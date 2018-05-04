@@ -33,17 +33,20 @@ class Act(object):
     def __str__(self):
         return self.first_line.text
 
-    def add_scene(self, first_line):
-        n = Scene(first_line)
+    def add_scene(self, first_scene_line):
+        if self.current_scene == 0:
+            n = Scene([self.first_line, first_scene_line])
+        else:
+            n = Scene([first_scene_line])
         self.scenes += [n]
         self.current_scene = len(self.scenes)
         return n
 
 
 class Scene(object):
-    def __init__(self, first_line):
-        self.lines = []
-        self.first_line = first_line
+    def __init__(self, first_lines):
+        self.lines = first_lines
+        self.first_line = first_lines[-1]
 
     def __str__(self):
         return self.first_line.text
@@ -62,7 +65,7 @@ class Scene(object):
             line = self.lines[i]
 
             if not line.line_num:
-                accumlator += line.complete_text() + "<br\>"
+                accumlator += line.complete_text() + "<br>"
                 i += 1
                 continue
             else:
@@ -72,7 +75,7 @@ class Scene(object):
 
             try:
                 while line.nxt and not line.nxt.num and line.speech_num == line.nxt.speech_num:
-                    t += "<br\>" + line.nxt.complete_text()
+                    t += "<br>" + line.nxt.complete_text()
                     line = line.nxt
                     i += 1
             except AttributeError as e:
@@ -91,7 +94,8 @@ class Scene(object):
 
 
 class Line(object):
-    def __init__(self, id, num, speaker, speech_num, text):
+    def __init__(self, type, id, num, speaker, speech_num, text):
+        self.type = type
         self.id = id
         self.num = num if "." in num else None
         self.derive_numbers()
@@ -123,10 +127,13 @@ class Line(object):
         return self.prev and self.speaker == self.prev.speaker
 
     def complete_text(self):
-        if not self.speaker or  self.matches_previous_speaker():
-            return self.text
+        txt = "<em>{}</em><br>".format(self.text) if self.type == "line" and not self.num else self.text
+        if self.type in ["act", "scene"]:
+            return "&emsp;&emsp;&emsp;&emsp;{}".format(txt)
+        if not self.speaker or self.matches_previous_speaker():
+            return "&emsp;" + txt
         else:
-            return "{}<br\>{}".format(self.speaker, self.text)
+            return "{}<br>&emsp;{}".format(self.speaker, txt)
 
 # line_id
 # line_number
@@ -153,35 +160,43 @@ scene = None
 prev_line = None
 
 for d in data:
+    if d["play_name"] in ["Henry V", "Henry VIII", "Pericles", "Taming of the Shrew", "Merchant of Venice", "Romeo and Juliet", "Troilus and Cressida"]:
+        continue  # "Henry V", "Henry VIII", "Pericles", "Taming of the Shrew", RAJ, TAC have lines outside of a scene, or scenes outside acts.
+                  # MOV has bad data - Act I, Scene II is misnumbered
     try:
         play = plays[d["play_name"]]
     except KeyError:
         play = Play(d["play_name"])
         plays[d["play_name"]] = play
+        act = None
+        scene = None
+        prev_line = None
 
-    line = Line(d["line_id"], d["line_number"], d["speaker"], d["speech_number"], d["text_entry"])
-    line.set_previous_line(prev_line)
+    line = Line(d["type"], d["line_id"], d["line_number"], d["speaker"], d["speech_number"], d["text_entry"])
 
-    type = d["type"]
-    if type == "act":
-        act = play.add_act(line)
-    elif type == "scene":
-        scene = act.add_scene(line)
-    elif type == "line":
-        scene.add_line(line)
+    try:
+        type = d["type"]
+        if type == "act":
+            prev_line = None
+            act = play.add_act(line)
+        elif type == "scene":
+            scene = act.add_scene(line)
+        elif type == "line":
+            scene.add_line(line)
 
-    prev_line = line
+        line.set_previous_line(prev_line)
+        prev_line = line
+    except Exception as e:
+        print vars(line)
+        print e
 
 for name, play in plays.iteritems():
-    if name == "Pericles":
-        continue  # Pericles has an aberration - lines outside of a scene, at the beginning of act III.  Needs thought.
-    if name == "Merchant of Venice":
-        continue  # Act I, Scene II is misnumbered
     hname = u"א" + name
     index = Index()
     index.set_title(name)
     index.categories = ["Drama", "Shakespeare"]
 
+    '''
     root = JaggedArrayNode()
     root.add_primary_titles(name, hname)
     root.add_structure(["Act"])
@@ -201,6 +216,11 @@ for name, play in plays.iteritems():
             scene_node.add_structure(["Line"])
             scene_node.index = index
             act_node.append(scene_node)
+    '''
+    root = JaggedArrayNode()
+    root.add_primary_titles(name, hname)
+    root.add_structure(["Act", "Scene", "Line"])
+    root.index = index
 
     index.nodes = root
 
