@@ -1,0 +1,1 @@
+TORAH_SPECIFIC = False
