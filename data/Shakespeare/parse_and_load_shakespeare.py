@@ -196,27 +196,6 @@ for name, play in plays.iteritems():
     index.set_title(name)
     index.categories = ["Drama", "Shakespeare"]
 
-    '''
-    root = JaggedArrayNode()
-    root.add_primary_titles(name, hname)
-    root.add_structure(["Act"])
-    root.index = index
-
-    for act in play.acts:
-        act_node = JaggedArrayNode()
-        title = act.first_line.text.replace("-", " ").replace(".", " ").strip()
-        act_node.add_primary_titles(title, u"א" + title)
-        act_node.add_structure(["Scene"])
-        act_node.index = index
-        root.append(act_node)
-        for scene in act.scenes:
-            scene_node = JaggedArrayNode()
-            title = scene.first_line.text.replace("-", " ").replace(".", " ").strip()
-            scene_node.add_primary_titles(title, u"א" + title)
-            scene_node.add_structure(["Line"])
-            scene_node.index = index
-            act_node.append(scene_node)
-    '''
     root = JaggedArrayNode()
     root.add_primary_titles(name, hname)
     root.add_structure(["Act", "Scene", "Line"])

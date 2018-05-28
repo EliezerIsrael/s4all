@@ -4,17 +4,21 @@
 # is for readability only. The table of contents will follow this structure.
 CATEGORY_ORDER = [
     "Poetry",
-    "Fiction",
+    "Philosophy",
+    "Religious Texts",
     "Non Fiction",
+    "Fiction",
     "Drama",
     "Folklore"
 ]
 
 TOP_CATEGORIES = [
     "Poetry",
+    "Philosophy",
+    "Religious Texts",
+    "Non Fiction",
     "Fiction",
     "Drama",
-    "Non Fiction",
     "Folklore"
 ]
 

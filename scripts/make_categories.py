@@ -28,7 +28,7 @@ def create_category(en, he, parent=None):
 db.category.remove({})
 db.term.remove({})
 
-for s in ["Act","Scene","Line"]:
+for s in ["Act","Scene","Line","Book","Page","Paragraph"]:
     t = Term()
     t.name = s
     t.add_primary_titles(s, u"א" + s)
@@ -40,5 +40,9 @@ prose = create_category("Fiction", u"פרוזה")
 nonfiction = create_category("Non Fiction", u"לא בדיוני")
 drama = create_category("Drama", u"דרמה")
 folklore = create_category("Folklore", u"פולקלור")
+philosophy = create_category("Philosophy", u"א")
+religious_texts = create_category("Religious Texts", u"ב")
 
 create_category("Shakespeare", u"שייקספיר", drama)
+cphil = create_category("Classical Philosophy", u"ג", philosophy)
+plato = create_category("Plato", u"ד", cphil)
