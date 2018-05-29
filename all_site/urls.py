@@ -1,8 +1,20 @@
 from django.conf.urls import url
 from django.http import HttpResponseRedirect
+from django.shortcuts import render
+
+
+def serve_static(request, page):
+    """
+    Serve a static page whose template matches the URL
+    """
+    return render(request,'static/%s.html' % page, {})
+
+def home(request):
+    return render(request,'static/all_home.html', {})
+
 
 static_pages = [
-    # "about",
+    "about",
     # "donate",
     # "strategy",
     # "supporters",
@@ -34,10 +46,10 @@ static_pages = [
 
 # Semi Static Content
 site_urlpatterns = [
-    # url(r'^$', reader_views.home, name="home"),
     # url(r'^metrics/?$', reader_views.metrics),
     # url(r'^digitized-by-sefaria/?$', reader_views.digitized_by_sefaria),
-    # url(r'^(%s)/?$' % "|".join(static_pages), reader_views.serve_static),
+    url(r'^$', home),
+    url(r'^(%s)/?$' % "|".join(static_pages), serve_static),
 ]
 
 # Redirects to Forum, Wiki, etc
